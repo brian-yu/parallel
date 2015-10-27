@@ -30,7 +30,7 @@ int main(int argc, const char* argv[])
 
 	//float prb = 0.001;
     float prb = 0.0001;
-    float increment = 0.001;
+    float increment = 0.01;
     if(argv[1] != NULL) {
         prb = atof(argv[1]);
         increment = atof(argv[1]);
@@ -44,7 +44,9 @@ int main(int argc, const char* argv[])
     float maxavg = 0;
     float maxprb = 0;
 
-    while(prb < .75) {
+    prb = 0.6;
+
+    while(prb < .65) {
         int prbtotal = 0;
         for (int m = 0; m < t; m++) {
 
@@ -223,7 +225,7 @@ int main(int argc, const char* argv[])
 
     }
 
-    //fprintf(fout, "%d %d\n", 1, n/n);
+    fprintf(fout, "%d %d\n", 1, n/n);
 
     printf("Max occurs at (%f, %f)\n", maxprb, maxavg/n);
 
