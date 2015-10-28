@@ -46,6 +46,7 @@ int main( int argc , char* argv[] )
       //
       for( j = 1 ; j < size ; j++ )
       {
+         printf("%d", size);
          MPI_Send( &result , 1 , MPI_DOUBLE , j , tag , MPI_COMM_WORLD ) ;
       }
       //
