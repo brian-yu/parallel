@@ -23,12 +23,13 @@ int main( int argc , char* argv[] )
    int        rank   ;
    int        size   ;
    MPI_Status status ;
-   int        tag    ;
+   int        tag = 0;
    //
    // other variables
    //
    int        k , j  ;
    double     result ;
+   double burnoutTime;
    //
    // boilerplate
    //
@@ -63,13 +64,21 @@ int main( int argc , char* argv[] )
    //
    // workers have rank > 0
    //
-   else
-   {
-      MPI_Recv( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD , &status ) ;
-      //
-      result *= 2.0 ;
-      //
-      MPI_Send( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
+    else
+    {
+        while(1)
+        {
+            MPI_Recv( &probability , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD , &status ) ;
+            //
+            if(probability < 0) {
+                break;
+            }
+            //
+            burnoutTime = func ( probability ) *= 2.0 ;
+            //
+            MPI_Send( &burnoutTime , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
+
+        }
    }
    //
    // boilerplate
