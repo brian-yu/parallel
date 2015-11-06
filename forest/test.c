@@ -43,7 +43,7 @@ int main(int argc, const char* argv[])
 {
 	int rseed;
 	rseed = time( NULL ) ;
-	rseed = 12121212;
+	//rseed = 12121212;
 	srand( rseed );
 	system( "clear" );
 
@@ -58,8 +58,9 @@ int main(int argc, const char* argv[])
 
 	int n = 30;
 
-
-    for(int count = 0; count < 100000; count++) {
+    float total = 0;
+    int count = 0;
+    while(count < 100000){
 
 	char forest[n][n];
 	for(int i = 0; i < n; i++) {
@@ -211,13 +212,17 @@ int main(int argc, const char* argv[])
         steps++;
 
     }
-
+    total += steps;
     if(steps > 1)
         printf("%d steps, %d\n", steps, count);
     else
         printf("%d step\n", steps);
+    count++;
+
 
 
     }
+    printf("Average Steps: %f\n", total/count);
+
 	return 0;
 }
