@@ -114,7 +114,7 @@ int main( int argc , char* argv[] )
         //
         if (prb < 0) {
             result = -1;
-            MPI_Send( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
+            MPI_Send( &result , 1 , MPI_FLOAT , 0 , tag , MPI_COMM_WORLD ) ;
         }
 
         int prbtotal = 0;
