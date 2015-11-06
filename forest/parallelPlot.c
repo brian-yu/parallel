@@ -91,7 +91,7 @@ int main( int argc , char* argv[] )
             index = status.MPI_SOURCE;
             fprintf(fout, "%f %f\n", workerPrb[index], result);
             MPI_Send( &prb, 1, MPI_FLOAT, index, tag, MPI_COMM_WORLD);
-            workerPrb[i] = prb;
+            workerPrb[index] = prb;
             prb += increment;
         }
         for(int i=1; i < size; i++) {
