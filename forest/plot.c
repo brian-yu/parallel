@@ -18,6 +18,17 @@ typedef struct Node
 
 } ListNode ;
 
+void freeList(ListNode* head)
+{
+    ListNode* tmp = NULL;
+
+    while (head != NULL) {
+        tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+}
+
 int main(int argc, const char* argv[])
 {
 
@@ -203,6 +214,7 @@ int main(int argc, const char* argv[])
 
             }
 
+            freeList(start);
             steps++;
 
         }

@@ -4,10 +4,20 @@
 #include <unistd.h>
 
 
-
 double myrand()
 {
    return ( rand() % 100 ) / 100.0 ;
+}
+
+void printArr(int row, int col, char arr[][col]) {
+
+	for(int i = 0; i < row; i++) {
+		for(int j = 0; j < col; j++) {
+			printf("%c ", arr[i][j]);
+		}
+		printf("%d\n",i);
+	}
+
 }
 
 typedef struct Node
@@ -18,214 +28,196 @@ typedef struct Node
 
 } ListNode ;
 
+void freeList(ListNode* head)
+{
+    ListNode* tmp = NULL;
+
+    while (head != NULL) {
+        tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+}
+
 int main(int argc, const char* argv[])
 {
-
-    FILE *fout = fopen("data.txt", "w");
 	int rseed;
 	rseed = time( NULL ) ;
-	//rseed = 12121212;
-	//srand( rseed );
-    srand(0);
+	rseed = 12121212;
+	srand( rseed );
+	system( "clear" );
 
-	//float prb = 0.001;
-    float prb = 0.0001;
-    float increment = 0.01;
-    if(argv[1] != NULL) {
-        prb = atof(argv[1]);
-        increment = atof(argv[1]);
-    }
-
-    fprintf(fout, "0 0\n");
+	float prb;
+	if(argc > 1) {
+		prb = atof(argv[1]);
+	} else {
+		printf("No probability inputted!\n");
+		exit(0);
+	}
+	printf("%f\n", prb);
 
 	int n = 30;
-    int t = 1000;
 
-    float maxavg = 0;
-    float maxprb = 0;
 
-    while(prb < 1) {
-        int prbtotal = 0;
-        for (int m = 0; m < t; m++) {
+    for(int count = 0; count < 100000; count++) {
 
-        char forest[n][n];
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < n; j++) {
-                float x = myrand();
-                if(x < prb) {
-                    forest[i][j] = 'X';
-                } else {
-                    forest[i][j] = '-';
-                }
+	char forest[n][n];
+	for(int i = 0; i < n; i++) {
+		for(int j = 0; j < n; j++) {
+			float x = myrand();
+			if(x < prb) {
+				forest[i][j] = 'X';
+			} else {
+				forest[i][j] = '-';
+			}
+		}
+	}
+
+
+
+	int steps = 0;
+
+    ListNode* head = NULL;
+    ListNode* current = NULL;
+    for(int i=0; i<n; i++) {
+        if(forest[i][0] == 'X') {
+            if(head != NULL) {
+                current->next = (ListNode*)malloc( sizeof(ListNode));
+                current->next->row = i;
+                current->next->col = 0;
+                current->next->next = NULL;
+                forest[i][0] = '*';
+                current = current->next;
+            } else {
+                head = (ListNode*)malloc(sizeof(ListNode));
+                head->row = i;
+                head->col = 0;
+                head->next = NULL;
+                forest[i][0] = '*';
+                current = head;
             }
         }
+    }
+	//steps++;
 
 
-        int steps = 0;
 
-        ListNode* start = NULL;
+    while (head != NULL) {
+
+        ListNode* current = head;
+        ListNode* newhead = NULL;
         ListNode* prev = NULL;
-        for(int i=0; i<n; i++) {
-            if(forest[i][0] == 'X') {
-                if(prev != NULL) {
-                    ListNode* l = NULL;
-                    l = (ListNode*)malloc( sizeof(ListNode));
-                    l->row = i;
-                    l->col = 0;
+
+        while (current!=NULL) {
+            int r = current->row;
+            int c = current->col;
+            forest[r][c] = '-';
+
+
+            if(forest[r+1][c] == 'X' && r+1 < n) {
+                forest[r+1][c] = '*';
+
+                ListNode* l = NULL;
+                l = (ListNode*)malloc(sizeof(ListNode));
+                l->row = r+1;
+                l->col = c;
+                l->next = NULL;
+
+                if(prev == NULL) {
+                    prev = l;
+                } else {
                     prev->next = l;
                     prev = l;
-                    forest[i][0] = '*';
-                    //free(l);
+                }
+
+                if(newhead == NULL) {
+                    newhead = l;
+                }
+
+            }
+            if(forest[r-1][c] == 'X' && r-1 >= 0) {
+                forest[r-1][c] = '*';
+
+                ListNode* l = NULL;
+                l = (ListNode*)malloc(sizeof(ListNode));
+                l->row = r-1;
+                l->col = c;
+                l->next = NULL;
+
+                if(prev == NULL) {
+                    prev = l;
                 } else {
-                    prev = (ListNode*)malloc(sizeof(ListNode));
-                    prev->row = i;
-                    prev->col = 0;
-                    prev->next = NULL;
-                    forest[i][0] = '*';
-                    start = prev;
-                }
-		    }
-	    }
-
-        while (start != NULL) {
-
-            ListNode* current = start;
-            start = NULL;
-            ListNode* prev = NULL;
-
-            while (current!=NULL) {
-                int r = current->row;
-                int c = current->col;
-                forest[r][c] = '-';
-
-                if(forest[r+1][c] == 'X' && r+1 < n) {
-                    forest[r+1][c] = '*';
-
-                    ListNode* l = NULL;
-                    l = (ListNode*)malloc(sizeof(ListNode));
-                    l->row = r+1;
-                    l->col = c;
-                    l->next = NULL;
-
-                    if(prev == NULL) {
-                        ListNode* temp = prev;
-                        prev = l;
-                        free(temp);
-                    } else {
-                        prev->next = l;
-                        prev = l;
-                    }
-
-                    if(start == NULL) {
-                        ListNode* temp = start;
-                        start = l;
-                        free(temp);
-                    }
-
-                }
-                if(forest[r-1][c] == 'X' && r-1 >= 0) {
-                    forest[r-1][c] = '*';
-
-                    ListNode* l = NULL;
-                    l = (ListNode*)malloc(sizeof(ListNode));
-                    l->row = r-1;
-                    l->col = c;
-                    l->next = NULL;
-
-                    if(prev == NULL) {
-                        ListNode* temp = prev;
-                        prev = l;
-                        free(temp);
-                    } else {
-                        prev->next = l;
-                        prev = l;
-                    }
-
-                    if(start == NULL) {
-                        ListNode* temp = start;
-                        start = l;
-                        free(temp);
-                    }
-
-                }
-                if(forest[r][c+1] == 'X' && c+1 < n) {
-                    forest[r][c+1] = '*';
-
-                    ListNode* l = NULL;
-                    l = (ListNode*)malloc(sizeof(ListNode));
-                    l->row = r;
-                    l->col = c+1;
-                    l->next = NULL;
-
-                    if(prev == NULL) {
-                        ListNode* temp = prev;
-                        prev = l;
-                        free(temp);
-                    } else {
-                        prev->next = l;
-                        prev = l;
-                    }
-
-                    if(start == NULL) {
-                        ListNode* temp = start;
-                        start = l;
-                        free(temp);
-                    }
-
-                }
-                if(forest[r][c-1] == 'X' && c-1 >= 0) {
-                    forest[r][c-1] = '*';
-
-                    ListNode* l = NULL;
-                    l = (ListNode*)malloc(sizeof(ListNode));
-                    l->row = r;
-                    l->col = c-1;
-                    l->next = NULL;
-
-                    if(prev == NULL) {
-                        ListNode* temp = prev;
-                        prev = l;
-                        free(temp);
-                    } else {
-                        prev->next = l;
-                        prev = l;
-                    }
-
-                    if(start == NULL) {
-                        ListNode* temp = start;
-                        start = l;
-                        free(temp);
-                    }
-
+                    prev->next = l;
+                    prev = l;
                 }
 
-                current = current->next;
+                if(newhead == NULL) {
+                    newhead = l;
+                }
+
+            }
+            if(forest[r][c+1] == 'X' && c+1 < n) {
+                forest[r][c+1] = '*';
+
+                ListNode* l = NULL;
+                l = (ListNode*)malloc(sizeof(ListNode));
+                l->row = r;
+                l->col = c+1;
+                l->next = NULL;
+
+                if(prev == NULL) {
+                    prev = l;
+                } else {
+                    prev->next = l;
+                    prev = l;
+                }
+
+                if(newhead == NULL) {
+                    newhead = l;
+                }
+
+            }
+            if(forest[r][c-1] == 'X' && c-1 >= 0) {
+                forest[r][c-1] = '*';
+
+                ListNode* l = NULL;
+                l = (ListNode*)malloc(sizeof(ListNode));
+                l->row = r;
+                l->col = c-1;
+                l->next = NULL;
+
+                if(prev == NULL) {
+                    prev = l;
+                } else {
+                    prev->next = l;
+                    prev = l;
+                }
+
+                if(newhead == NULL) {
+                    newhead = l;
+                }
 
             }
 
-            steps++;
-
+            current = current->next;
         }
 
-        prbtotal += steps;
+        freeList(head);
 
-        }
-        float avg = prbtotal/t;
+        head = newhead;
 
-        if(avg > maxavg){
-            maxavg = avg;
-            maxprb = prb;
-        }
 
-        fprintf(fout, "%f %f\n", prb, avg/n);
-        printf("%f %f\n", prb, avg/n);
-        prb += increment;
+
+        steps++;
 
     }
 
-    fprintf(fout, "%d %d\n", 1, n/n);
+    if(steps > 1)
+        printf("%d steps, %d\n", steps, count);
+    else
+        printf("%d step\n", steps);
 
-    printf("Max occurs at (%f, %f)\n", maxprb, maxavg/n);
 
+    }
 	return 0;
 }
