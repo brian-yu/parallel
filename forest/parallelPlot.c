@@ -79,7 +79,7 @@ int main( int argc , char* argv[] )
     //
     if( rank == 0 )
     {
-        int workerPrb[size-1];
+        float workerPrb[size-1];
 
         for(int i=1; i < size; i++) {
             MPI_Send( &prb, 1, MPI_FLOAT, i, tag, MPI_COMM_WORLD);
