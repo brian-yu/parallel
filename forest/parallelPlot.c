@@ -113,7 +113,7 @@ int main( int argc , char* argv[] )
         MPI_Recv( &prb , 1 , MPI_FLOAT , 0 , tag , MPI_COMM_WORLD , &status ) ;
         //
         if (prb < 0) {
-            break;
+            continue;
         }
 
         int prbtotal = 0;
