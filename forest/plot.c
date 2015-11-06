@@ -1,23 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 
+double gettime()
+{
+	double t ;
+	//
+	struct timeval* ptr = (struct timeval*)malloc( sizeof(struct timeval) ) ;
+	//
+	gettimeofday( ptr , NULL ) ; // second argument is time zone... NULL
+	//
+	t = ptr->tv_sec * 1000000.0 + ptr->tv_usec ;
+	//
+	free( ptr ) ;
+	//
+	return t / 1000000.0 ;
+}
 
 double myrand()
 {
    return ( rand() % 100 ) / 100.0 ;
-}
-
-void printArr(int row, int col, char arr[][col]) {
-
-	for(int i = 0; i < row; i++) {
-		for(int j = 0; j < col; j++) {
-			printf("%c ", arr[i][j]);
-		}
-		printf("%d\n",i);
-	}
-
 }
 
 typedef struct Node
@@ -42,6 +45,7 @@ void freeList(ListNode* head)
 int main(int argc, const char* argv[])
 {
 
+    double started = gettime() ;
     FILE *fout = fopen("data.txt", "w");
 	int rseed;
 	rseed = time( NULL ) ;
@@ -56,7 +60,7 @@ int main(int argc, const char* argv[])
         increment = atof(argv[1]);
     }
 
-	printf("%f\n", prb);
+	//printf("%f\n", prb);
 
     fprintf(fout, "0 0\n");
 
@@ -233,13 +237,15 @@ int main(int argc, const char* argv[])
     }
 
     fprintf(fout, "%f %f\n", prb, avg/n);
-    printf("%f %f\n", prb, avg/n);
+    //printf("%f %f\n", prb, avg/n);
     prb += increment;
 
     }
     fprintf(fout, "%d %d\n", 1, n/n);
 
-    printf("Max occurs at (%f, %f)\n", maxprb, maxavg/n);
+    double stopped = gettime() ;
+    printf("Time: %0.16f seconds\n" , stopped - started ) ;
+    //printf("Max occurs at (%f, %f)\n", maxprb, maxavg/n);
 
 	return 0;
 }

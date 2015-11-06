@@ -14,11 +14,26 @@
 #include <stdio.h>
 //
 #include <stdlib.h>
-#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 //
 #include "mpi.h"
 //
+double gettime()
+{
+	double t ;
+	//
+	struct timeval* ptr = (struct timeval*)malloc( sizeof(struct timeval) ) ;
+	//
+	gettimeofday( ptr , NULL ) ; // second argument is time zone... NULL
+	//
+	t = ptr->tv_sec * 1000000.0 + ptr->tv_usec ;
+	//
+	free( ptr ) ;
+	//
+	return t / 1000000.0 ;
+}
+
 double myrand()
 {
     return ( rand() % 100 ) / 100.0 ;
@@ -59,6 +74,7 @@ int main( int argc , char* argv[] )
     float     result ;
     float     stop = -1;
     //
+    double started = gettime() ;
     int index;
     FILE *fout = fopen("parallelData.txt", "w");
     float prb = 0.01;
@@ -284,6 +300,8 @@ int main( int argc , char* argv[] )
     //
     MPI_Finalize() ;
     //
+    double stopped = gettime() ;
+    printf("Time: %0.16f seconds\n" , stopped - started ) ;
     return 0;
 }
 //
