@@ -90,7 +90,7 @@ int main( int argc , char* argv[] )
             MPI_Recv( &result, 1, MPI_FLOAT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             index = status.MPI_SOURCE;
             fprintf(fout, "%f %f\n", workerPrb[index], result);
-            MPI_Send( &prb, 1, MPI_FLOAT, i, tag, MPI_COMM_WORLD);
+            MPI_Send( &prb, 1, MPI_FLOAT, index, tag, MPI_COMM_WORLD);
             workerPrb[i] = prb;
             prb += increment;
         }
@@ -98,7 +98,7 @@ int main( int argc , char* argv[] )
             MPI_Recv( &result, 1, MPI_FLOAT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             index = status.MPI_SOURCE;
             fprintf(fout, "%f %f\n", workerPrb[index], result);
-            MPI_Send( &stop, 1, MPI_FLOAT, i, tag, MPI_COMM_WORLD);
+            MPI_Send( &stop, 1, MPI_FLOAT, index, tag, MPI_COMM_WORLD);
         }
     }
     //
