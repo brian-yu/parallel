@@ -95,7 +95,7 @@ int main( int argc , char* argv[] )
     //
     if( rank == 0 )
     {
-        double workerPrb[size-1];
+        double workerPrb[size];
 
         for(int i=1; i < size; i++) {
             MPI_Send( &prb, 1, MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
