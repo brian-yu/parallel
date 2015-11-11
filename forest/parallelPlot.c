@@ -71,14 +71,14 @@ int main( int argc , char* argv[] )
     // other variables
     //
     int        k , j  ;
-    float     result ;
-    float     stop = -1;
+    double     result ;
+    double     stop = -1;
     //
     double started = gettime() ;
     int index;
     FILE *fout = fopen("parallelData.txt", "w");
-    float prb = 0.01;
-    float increment = 0.01;
+    double prb = 0.01;
+    double increment = 0.01;
     if(argv[1] != NULL) {
         prb = atof(argv[1]);
         increment = atof(argv[1]);
@@ -95,26 +95,27 @@ int main( int argc , char* argv[] )
     //
     if( rank == 0 )
     {
-        float workerPrb[size-1];
+        double workerPrb[size-1];
 
         for(int i=1; i < size; i++) {
-            MPI_Send( &prb, 1, MPI_FLOAT, i, tag, MPI_COMM_WORLD);
+            MPI_Send( &prb, 1, MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
             workerPrb[i] = prb;
             prb += increment;
         }
         while(prb < 1) {
-            MPI_Recv( &result, 1, MPI_FLOAT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv( &result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             index = status.MPI_SOURCE;
             fprintf(fout, "%f %f\n", workerPrb[index], result);
-            MPI_Send( &prb, 1, MPI_FLOAT, index, tag, MPI_COMM_WORLD);
+            printf("%f %f\n", workerPrb[index], result);
+            MPI_Send( &prb, 1, MPI_DOUBLE, index, tag, MPI_COMM_WORLD);
             workerPrb[index] = prb;
             prb += increment;
         }
         for(int i=1; i < size; i++) {
-            MPI_Recv( &result, 1, MPI_FLOAT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv( &result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             index = status.MPI_SOURCE;
             fprintf(fout, "%f %f\n", workerPrb[index], result);
-            MPI_Send( &stop, 1, MPI_FLOAT, index, tag, MPI_COMM_WORLD);
+            MPI_Send( &stop, 1, MPI_DOUBLE, index, tag, MPI_COMM_WORLD);
         }
     }
     //
@@ -126,11 +127,11 @@ int main( int argc , char* argv[] )
         int n = 30;
         int t = 1000;
 
-        MPI_Recv( &prb , 1 , MPI_FLOAT , 0 , tag , MPI_COMM_WORLD , &status ) ;
+        MPI_Recv( &prb , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD , &status ) ;
         //
         if (prb < 0) {
             result = -1;
-            MPI_Send( &result , 1 , MPI_FLOAT , 0 , tag , MPI_COMM_WORLD ) ;
+            MPI_Send( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
         }
 
         int prbtotal = 0;
@@ -289,8 +290,8 @@ int main( int argc , char* argv[] )
             prbtotal += steps;
 
         }
-        float avg = prbtotal/t;
-        float normalized = avg/n;
+        double avg = prbtotal/t;
+        double normalized = avg/n;
         result = normalized;
         //
         MPI_Send( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
