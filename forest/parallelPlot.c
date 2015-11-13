@@ -109,6 +109,7 @@ int main( int argc , char* argv[] )
             //
             k = status.MPI_SOURCE ;
             fprintf(fout, "%f %f\n", kjob[k], result);
+			printf("%f %f\n", kjob[k], result);
             //
             kjob[k] = prb;
             MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
@@ -124,7 +125,7 @@ int main( int argc , char* argv[] )
             prb = -1.0;
             MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
         }
-		fprintf(fout, "%f %f\n", 1.0, 0.0);
+		fprintf(fout, "%f %f\n", 1.0, 1.0);
 		
 		printf("Total time: %fs\n", gettime()-started);
     }
