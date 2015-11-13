@@ -97,8 +97,8 @@ int main( int argc , char* argv[] )
         //
         int k, j;
         double kjob[size];
-        //double maximum = 0.0;
-        //double maximumPrb = 0.0;
+        double maximum = 0.0;
+        double maximumPrb = 0.0;
 
 	fprintf(fout, "%f %f\n", 0.0, 0.0);
         for( int k = 1 ; k < size ; k++ )
@@ -113,10 +113,10 @@ int main( int argc , char* argv[] )
             MPI_Recv( &result , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
             //
             k = status.MPI_SOURCE ;
-            //if(result > maximum) {
-            //    maximum = result;
-            //    maximumPrb = kjob[k];
-            //}
+            if(result > maximum) {
+                maximum = result;
+                maximumPrb = kjob[k];
+            }
             fprintf(fout, "%f %f\n", kjob[k], result);
 	    printf("%f %f\n", kjob[k], result);
             //
@@ -130,13 +130,13 @@ int main( int argc , char* argv[] )
             k = status.MPI_SOURCE;
             
             fprintf(fout, "%f %f\n", kjob[k], result);
-	    printf("%f %f\n", kjob[k], result);	  
+	        printf("%f %f\n", kjob[k], result);	  
             prb = -1.0;
             MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
         }
 	fprintf(fout, "%f %f\n", 1.0, 1.0);
 		
-        //printf("Maximum occurs at (%f, %f)\n", maximumPrb, maximum);
+        printf("Maximum occurs at (%f, %f)\n", maximumPrb, maximum);
 	printf("Total time: %fs\n", gettime()-started);
     }
     //
