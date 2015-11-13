@@ -95,6 +95,13 @@ int main( int argc , char* argv[] )
     if( rank == 0 )
     {
         //
+        int k, j;
+        double kjob[size];
+        //double maximum = 0.0;
+        //double maximumPrb = 0.0;
+        prb = 0.35;
+
+	fprintf(fout, "%f %f\n", 0.0, 0.0);
         for( int k = 1 ; k < size ; k++ )
         {
             kjob[k] = prb;
@@ -107,7 +114,12 @@ int main( int argc , char* argv[] )
             MPI_Recv( &result , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
             //
             k = status.MPI_SOURCE ;
-            printf("%f %f\n", kjob[k], result);
+            //if(result > maximum) {
+            //    maximum = result;
+            //    maximumPrb = kjob[k];
+            //}
+            fprintf(fout, "%f %f\n", kjob[k], result);
+	    printf("%f %f\n", kjob[k], result);
             //
             kjob[k] = prb;
             MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
@@ -118,12 +130,15 @@ int main( int argc , char* argv[] )
             MPI_Recv(&result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             k = status.MPI_SOURCE;
             
-            fprintf("%f %f\n", kjob[k], result);
-		  
+            fprintf(fout, "%f %f\n", kjob[k], result);
+	    printf("%f %f\n", kjob[k], result);	  
             prb = -1.0;
             MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
         }
-        
+	fprintf(fout, "%f %f\n", 1.0, 1.0);
+		
+        //printf("Maximum occurs at (%f, %f)\n", maximumPrb, maximum);
+	printf("Total time: %fs\n", gettime()-started);
     }
     //
     // workers have rank > 0
@@ -286,9 +301,10 @@ int main( int argc , char* argv[] )
 
                         current = current->next;
                     }
+                    if (m%10 != 0 && m%5!=0) {
+                        freeList(head);
 
-                    freeList(head);
-
+                    }
                     head = newhead;
 
 
