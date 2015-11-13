@@ -121,7 +121,7 @@ int main( int argc , char* argv[] )
             printf("%f %f\n", kjob[index], result);
 		  
             prb = -1.0;
-            MPI_SEND(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
+            MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
         }
     }
     //
