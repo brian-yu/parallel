@@ -103,12 +103,14 @@ int main( int argc , char* argv[] )
             prb += increment;
         }
         while(prb < 1) {
+            printf("%f\n", prb);
             MPI_Recv( &result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             index = status.MPI_SOURCE;
             fprintf(fout, "%f %f\n", workerPrb[index], result);
             printf("%f %f\n", workerPrb[index], result);
-            MPI_Send( &prb, 1, MPI_DOUBLE, index, tag, MPI_COMM_WORLD);
+            
             workerPrb[index] = prb;
+			MPI_Send( &prb, 1, MPI_DOUBLE, index, tag, MPI_COMM_WORLD);
             prb += increment;
         }
         for(int i=1; i < size; i++) {
@@ -133,7 +135,7 @@ int main( int argc , char* argv[] )
             result = -1;
             MPI_Send( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
         }
-
+        printf("%f", prb);
         int prbtotal = 0;
         for (int m = 0; m < t; m++) {
 
