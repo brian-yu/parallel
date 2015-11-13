@@ -74,7 +74,7 @@ int main( int argc , char* argv[] )
     //
     double started = gettime() ;
     int index;
-    FILE *fout = fopen("testData.txt", "w");
+    FILE *fout = fopen("parallelData.txt", "w");
     double prb = 0.01;
     double increment = 0.01;
     if(argv[1] != NULL) {
@@ -95,7 +95,7 @@ int main( int argc , char* argv[] )
     if( rank == 0 )
     {
         //
-        for( k = 1 ; k < size ; k++ )
+        for( int k = 1 ; k < size ; k++ )
         {
             kjob[k] = prb;
             MPI_Send( &prb , 1 , MPI_DOUBLE , k , tag , MPI_COMM_WORLD ) ;
@@ -107,22 +107,23 @@ int main( int argc , char* argv[] )
             MPI_Recv( &result , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
             //
             k = status.MPI_SOURCE ;
-            printf("%f %f\n", kjob[index], result);
+            printf("%f %f\n", kjob[k], result);
             //
             kjob[k] = prb;
             MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
             prb += increment;
         }
         //
-        for (j=1; j <size; j++) {
+        for (int j=1; j <size; j++) {
             MPI_Recv(&result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             k = status.MPI_SOURCE;
             
-            printf("%f %f\n", kjob[index], result);
+            fprintf("%f %f\n", kjob[k], result);
 		  
             prb = -1.0;
             MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
         }
+        
     }
     //
     // workers have rank > 0
@@ -141,7 +142,7 @@ int main( int argc , char* argv[] )
             int n = 30;
             int t = 1000;
 
-            printf("%f", prb);
+            //printf("%f", prb);
             int prbtotal = 0;
             for (int m = 0; m < t; m++) {
 
@@ -174,7 +175,7 @@ int main( int argc , char* argv[] )
                             current = current->next;
                         } else {
                             head = (ListNode*)malloc(sizeof(ListNode));
-                            head->row = i;
+                            head->row = i;  
                             head->col = 0;
                             head->next = NULL;
                             forest[i][0] = '*';

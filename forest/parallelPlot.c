@@ -1,24 +1,23 @@
-//
+// 
 // Torbert, 27 October 2014
-//
+// 
 // MPI Demo
 //    mpicc mpiDemo.c
 //    mpirun -np 4 a.out
-//
+// 
 // Manager-Worker model for parallel processing.
-//
-// time ... real ... user
-//
-// htop
-//
+// 
+// time ... real ... user 
+// 
+// htop 
+// 
 #include <stdio.h>
-//
+// 
 #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
-//
 #include "mpi.h"
-//
+// 
 double gettime()
 {
 	double t ;
@@ -56,8 +55,7 @@ void freeList(ListNode* head)
         free(tmp);
     }
 }
-
-
+//
 int main( int argc , char* argv[] )
 {
     //
@@ -72,7 +70,7 @@ int main( int argc , char* argv[] )
     //
     int        k , j  ;
     double     result ;
-    double     stop = -1;
+    double kjob[size];
     //
     double started = gettime() ;
     int index;
@@ -83,7 +81,7 @@ int main( int argc , char* argv[] )
         prb = atof(argv[1]);
         increment = atof(argv[1]);
     }
-    //
+    
     //
     // boilerplate
     //
@@ -92,221 +90,234 @@ int main( int argc , char* argv[] )
     MPI_Comm_rank( MPI_COMM_WORLD , &rank ) ; // different
     //
     // manager has rank = 0
+    srand(rank);
     //
     if( rank == 0 )
     {
-        double workerPrb[size];
-
-        for(int i=1; i < size; i++) {
-            MPI_Send( &prb, 1, MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
-            workerPrb[i] = prb;
+        //
+		fprintf(fout, "%f %f\n", 0.0, 0.0);
+        for( int k = 1 ; k < size ; k++ )
+        {
+            kjob[k] = prb;
+            MPI_Send( &prb , 1 , MPI_DOUBLE , k , tag , MPI_COMM_WORLD ) ;
             prb += increment;
         }
-        while(prb < 1) {
-            printf("%f\n", prb);
-            MPI_Recv( &result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
-            index = status.MPI_SOURCE;
-            fprintf(fout, "%f %f\n", workerPrb[index], result);
-            printf("%f %f\n", workerPrb[index], result);
+        //
+        while (prb < 1)
+        {
+            MPI_Recv( &result , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
+            //
+            k = status.MPI_SOURCE ;
+            fprintf(fout, "%f %f\n", kjob[k], result);
+            //
+            kjob[k] = prb;
+            MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
+            prb += increment;
+        }
+        //
+        for (int j=1; j <size; j++) {
+            MPI_Recv(&result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
+            k = status.MPI_SOURCE;
             
-            workerPrb[index] = prb;
-			MPI_Send( &prb, 1, MPI_DOUBLE, index, tag, MPI_COMM_WORLD);
-            prb += increment;
+            fprintf(fout, "%f %f\n", kjob[k], result);
+		  
+            prb = -1.0;
+            MPI_Send(&prb, 1, MPI_DOUBLE, k, tag, MPI_COMM_WORLD);
         }
-        for(int i=1; i < size; i++) {
-            MPI_Recv( &result, 1, MPI_DOUBLE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
-            index = status.MPI_SOURCE;
-            fprintf(fout, "%f %f\n", workerPrb[index], result);
-            MPI_Send( &stop, 1, MPI_DOUBLE, index, tag, MPI_COMM_WORLD);
-        }
+		fprintf(fout, "%f %f\n", 1.0, 0.0);
+		
+		printf("Total time: %fs\n", gettime()-started);
     }
     //
     // workers have rank > 0
     //
     else
     {
-        srand( rank );
-        int n = 30;
-        int t = 1000;
+	   
+        while(1) 
+        {
+            MPI_Recv(&prb, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
+            if(prb<0)
+                break;
+            //
+            // . . .
+            //
+            int n = 30;
+            int t = 1000;
 
-        MPI_Recv( &prb , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD , &status ) ;
-        //
-        if (prb < 0) {
-            result = -1;
-            MPI_Send( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
-        }
-        printf("%f", prb);
-        int prbtotal = 0;
-        for (int m = 0; m < t; m++) {
+            //printf("%f", prb);
+            int prbtotal = 0;
+            for (int m = 0; m < t; m++) {
 
-            char forest[n][n];
-            for(int i = 0; i < n; i++) {
-                for(int j = 0; j < n; j++) {
-                    float x = myrand();
-                    if(x < prb) {
-                        forest[i][j] = 'X';
-                    } else {
-                        forest[i][j] = '-';
+                char forest[n][n];
+                for(int i = 0; i < n; i++) {
+                    for(int j = 0; j < n; j++) {
+                        float x = myrand();
+                        if(x < prb) {
+                            forest[i][j] = 'X';
+                        } else {
+                            forest[i][j] = '-';
+                        }
                     }
                 }
-            }
 
 
 
-            int steps = 0;
+                int steps = 0;
 
-            ListNode* head = NULL;
-            ListNode* current = NULL;
-            for(int i=0; i<n; i++) {
-                if(forest[i][0] == 'X') {
-                    if(head != NULL) {
-                        current->next = (ListNode*)malloc( sizeof(ListNode));
-                        current->next->row = i;
-                        current->next->col = 0;
-                        current->next->next = NULL;
-                        forest[i][0] = '*';
+                ListNode* head = NULL;
+                ListNode* current = NULL;
+                for(int i=0; i<n; i++) {
+                    if(forest[i][0] == 'X') {
+                        if(head != NULL) {
+                            current->next = (ListNode*)malloc( sizeof(ListNode));
+                            current->next->row = i;
+                            current->next->col = 0;
+                            current->next->next = NULL;
+                            forest[i][0] = '*';
+                            current = current->next;
+                        } else {
+                            head = (ListNode*)malloc(sizeof(ListNode));
+                            head->row = i;  
+                            head->col = 0;
+                            head->next = NULL;
+                            forest[i][0] = '*';
+                            current = head;
+                        }
+                    }
+                }
+                //steps++;
+
+
+
+                while (head != NULL) {
+
+                    ListNode* current = head;
+                    ListNode* newhead = NULL;
+                    ListNode* prev = NULL;
+
+                    while (current!=NULL) {
+                        int r = current->row;
+                        int c = current->col;
+                        forest[r][c] = '-';
+
+
+                        if(forest[r+1][c] == 'X' && r+1 < n) {
+                            forest[r+1][c] = '*';
+
+                            ListNode* l = NULL;
+                            l = (ListNode*)malloc(sizeof(ListNode));
+                            l->row = r+1;
+                            l->col = c;
+                            l->next = NULL;
+
+                            if(prev == NULL) {
+                                prev = l;
+                            } else {
+                                prev->next = l;
+                                prev = l;
+                            }
+
+                            if(newhead == NULL) {
+                                newhead = l;
+                            }
+
+                        }
+                        if(forest[r-1][c] == 'X' && r-1 >= 0) {
+                            forest[r-1][c] = '*';
+
+                            ListNode* l = NULL;
+                            l = (ListNode*)malloc(sizeof(ListNode));
+                            l->row = r-1;
+                            l->col = c;
+                            l->next = NULL;
+
+                            if(prev == NULL) {
+                                prev = l;
+                            } else {
+                                prev->next = l;
+                                prev = l;
+                            }
+
+                            if(newhead == NULL) {
+                                newhead = l;
+                            }
+
+                        }
+                        if(forest[r][c+1] == 'X' && c+1 < n) {
+                            forest[r][c+1] = '*';
+
+                            ListNode* l = NULL;
+                            l = (ListNode*)malloc(sizeof(ListNode));
+                            l->row = r;
+                            l->col = c+1;
+                            l->next = NULL;
+
+                            if(prev == NULL) {
+                                prev = l;
+                            } else {
+                                prev->next = l;
+                                prev = l;
+                            }
+
+                            if(newhead == NULL) {
+                                newhead = l;
+                            }
+
+                        }
+                        if(forest[r][c-1] == 'X' && c-1 >= 0) {
+                            forest[r][c-1] = '*';
+
+                            ListNode* l = NULL;
+                            l = (ListNode*)malloc(sizeof(ListNode));
+                            l->row = r;
+                            l->col = c-1;
+                            l->next = NULL;
+
+                            if(prev == NULL) {
+                                prev = l;
+                            } else {
+                                prev->next = l;
+                                prev = l;
+                            }
+
+                            if(newhead == NULL) {
+                                newhead = l;
+                            }
+
+                        }
+
                         current = current->next;
-                    } else {
-                        head = (ListNode*)malloc(sizeof(ListNode));
-                        head->row = i;
-                        head->col = 0;
-                        head->next = NULL;
-                        forest[i][0] = '*';
-                        current = head;
                     }
+
+                    freeList(head);
+
+                    head = newhead;
+
+
+
+                    steps++;
+
                 }
-            }
-            //steps++;
-
-
-
-            while (head != NULL) {
-
-                ListNode* current = head;
-                ListNode* newhead = NULL;
-                ListNode* prev = NULL;
-
-                while (current!=NULL) {
-                    int r = current->row;
-                    int c = current->col;
-                    forest[r][c] = '-';
-
-
-                    if(forest[r+1][c] == 'X' && r+1 < n) {
-                        forest[r+1][c] = '*';
-
-                        ListNode* l = NULL;
-                        l = (ListNode*)malloc(sizeof(ListNode));
-                        l->row = r+1;
-                        l->col = c;
-                        l->next = NULL;
-
-                        if(prev == NULL) {
-                            prev = l;
-                        } else {
-                            prev->next = l;
-                            prev = l;
-                        }
-
-                        if(newhead == NULL) {
-                            newhead = l;
-                        }
-
-                    }
-                    if(forest[r-1][c] == 'X' && r-1 >= 0) {
-                        forest[r-1][c] = '*';
-
-                        ListNode* l = NULL;
-                        l = (ListNode*)malloc(sizeof(ListNode));
-                        l->row = r-1;
-                        l->col = c;
-                        l->next = NULL;
-
-                        if(prev == NULL) {
-                            prev = l;
-                        } else {
-                            prev->next = l;
-                            prev = l;
-                        }
-
-                        if(newhead == NULL) {
-                            newhead = l;
-                        }
-
-                    }
-                    if(forest[r][c+1] == 'X' && c+1 < n) {
-                        forest[r][c+1] = '*';
-
-                        ListNode* l = NULL;
-                        l = (ListNode*)malloc(sizeof(ListNode));
-                        l->row = r;
-                        l->col = c+1;
-                        l->next = NULL;
-
-                        if(prev == NULL) {
-                            prev = l;
-                        } else {
-                            prev->next = l;
-                            prev = l;
-                        }
-
-                        if(newhead == NULL) {
-                            newhead = l;
-                        }
-
-                    }
-                    if(forest[r][c-1] == 'X' && c-1 >= 0) {
-                        forest[r][c-1] = '*';
-
-                        ListNode* l = NULL;
-                        l = (ListNode*)malloc(sizeof(ListNode));
-                        l->row = r;
-                        l->col = c-1;
-                        l->next = NULL;
-
-                        if(prev == NULL) {
-                            prev = l;
-                        } else {
-                            prev->next = l;
-                            prev = l;
-                        }
-
-                        if(newhead == NULL) {
-                            newhead = l;
-                        }
-
-                    }
-
-                    current = current->next;
-                }
-
-                freeList(head);
-
-                head = newhead;
-
-
-
-                steps++;
+                prbtotal += steps;
 
             }
-            prbtotal += steps;
-
+            double avg = prbtotal/t;
+            double normalized = avg/n;
+            result = normalized;
+		   
+		   
+            MPI_Send(&result, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
         }
-        double avg = prbtotal/t;
-        double normalized = avg/n;
-        result = normalized;
-        //
-        MPI_Send( &result , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
+      
     }
     //
     // boilerplate
     //
     MPI_Finalize() ;
     //
-    double stopped = gettime() ;
-    printf("Time: %0.16f seconds\n" , stopped - started ) ;
     return 0;
 }
-//
+// 
 // end of file
-//
+// 
