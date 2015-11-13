@@ -1,0 +1,2 @@
+mario slots = 4
+metaknight slots = 4
