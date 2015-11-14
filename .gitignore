@@ -7,3 +7,5 @@
 /huffman/a.out
 
 *.out
+*data.txt
+*Data.txt
