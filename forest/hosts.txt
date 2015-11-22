@@ -1,2 +1,0 @@
-gameandwatch slots = 4
-ganondorf slots = 4

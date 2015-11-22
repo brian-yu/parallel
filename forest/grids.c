@@ -153,7 +153,7 @@ int main( int argc , char* argv[] )
             //
             // . . .
             //
-            int n = 30;
+            int n = atoi(argv[2]);
             int t = 1000;
 
             //printf("%f", prb);
