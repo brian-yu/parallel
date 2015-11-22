@@ -2,6 +2,8 @@
 /forest/data.txt
 /forest/data1.txt
 /forest/parallelData.txt
+/forest/parallelFire.png
+/forest/testData.txt
 /forest/fire.png
 /forest/fire1.png
 /huffman/a.out
@@ -9,3 +11,4 @@
 *.out
 *data.txt
 *Data.txt
+/forest/*.png
