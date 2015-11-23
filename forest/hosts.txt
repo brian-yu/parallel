@@ -1,4 +1,4 @@
-peach slots=4
+samus slots=4
 localhost slots=5
-pit slots=4
-link slots=4
+mario slots=4
+dijkstra slots=4
