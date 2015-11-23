@@ -1,0 +1,4 @@
+peach slots=4
+localhost slots=5
+pit slots=4
+link slots=4
