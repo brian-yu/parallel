@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 // 
-#include <GLUT/glut.h>
+#include <GL/glut.h>
 // 
 #define N     600
 #define TREE    1 
