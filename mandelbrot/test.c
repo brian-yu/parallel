@@ -1,11 +1,11 @@
-#include <GL/glut.h>    // Header File For The GLUT Library
+#include <GL/glut.h>    
 #include <math.h>
 #include <complex.h>
 
 int main (int argc, char *argv[])
 {
     int i, j, count;
-    float re_max=1.0, re_min=-2.0, im_max=1.0, im_min=-1.0 ; //aspect ratio 3/2
+    float re_max=1.0, re_min=-2.0, im_max=1.0, im_min=-1.0 ; 
     float real_delta = (re_max - re_min)/750;
     float imag_delta = (im_max - im_min)/500;
 
@@ -17,11 +17,11 @@ int main (int argc, char *argv[])
     glutInit(&argc, argv);
     glutInitDisplayMode (GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowPosition(150,150);
-    glutInitWindowSize(750,500); // aspect ratio of 3/2
+    glutInitWindowSize(750,500); 
     glutCreateWindow (argv[0]);
 
-    glClearColor (0.1, 0.2, 0.3, 0.0);  // choosing the background color
-    glClear (GL_COLOR_BUFFER_BIT);      // setting the color buffer to background color
+    glClearColor (0.1, 0.2, 0.3, 0.0);  
+    glClear (GL_COLOR_BUFFER_BIT);      
     glColor4f(0.5,0.7,0.3,0.0);
     glPointSize(1);
 

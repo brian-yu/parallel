@@ -1,5 +1,7 @@
-a.out: fireGL.c
+fireGL: fireGL.c
 	gcc -lGL -lGLU -lglut fireGL.c
+mandelbrot: mandelbrot.c
+	gcc -lGL -lGLU -lglut mandelbrot.c
 
 clean:
-	rm a.out
+	rm fireGL mandelbrot
