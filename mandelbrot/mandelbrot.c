@@ -73,6 +73,7 @@ void reshapefunc(int wscr,int hscr)
 }
 void mousefunc(int button,int state,int xscr,int yscr)
 {
+
 }
 void keyfunc(unsigned char key,int xscr,int yscr)
 {
