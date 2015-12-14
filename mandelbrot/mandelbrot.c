@@ -40,23 +40,27 @@ void displayfunc()
          int i = 0;
          int max = 100;
          int steps = 0;
+         int blown = 0;
          for (i=0; i < max; i++) {
             if (a*a + b*b >= 2*2) {
+                blown = 1;
+                //printf("Blown");
+                //glColor3f( 0.0, 0.0, 0.0);
                 break;
             }
             else {
-               // double temp = (a+b)*(a+b) + x0;
-               double temp = a*a - b*b + x0;
+               double temp = (a+b)*(a+b) + x0;
+               //double temp = (a*a) - (b*b) + x0;
                b = 2*a*b + y0;
                a = temp; 
             }
          }
          
-         if (i == max) {
+         if (blown == 0) {
             glColor3f( 0.0, 0.0, 0.0);
          }
          glBegin(GL_POINTS);
-         glVertex2f(x,y);
+         glVertex2f(x0,y0);
          glEnd();
       }
    }
