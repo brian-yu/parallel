@@ -24,43 +24,41 @@ void idlefunc()
 */
 void displayfunc()
 {
-   int x, y;
+   double px, py;
    //
    //
    glClear(GL_COLOR_BUFFER_BIT); // white
    //
-   for( x = 0 ; x < N ; x++ )
+   for( px = 0 ; px < N ; px++ )
    {
-      for( y = 0 ; y < N ; y++ )
+      for( py = 0 ; py < N ; py++ )
       {
          double a = 0.0;
          double b = 0.0;
-         double x0 = (((double)x)/N)*(2.5+2.5)-2.5;
-         double y0 = (((double)y)/N)*(1.5+1.5)-1.5;
-         int i = 0;
-         int max = 100;
-         int steps = 0;
-         int blown = 0;
-         for (i=0; i < max; i++) {
-            if (a*a + b*b >= 2*2) {
-                blown = 1;
-                //printf("Blown");
-                //glColor3f( 0.0, 0.0, 0.0);
+         //double x = (x/N)*(2+2)-2;
+         //double y = (y/N)*(2+2)-2;
+         double x = (x/N)*(2+2);
+         double y = (y/N)*(2+2);
+         int i;
+         int lim = 100;
+         int steps = 0; 
+         for (i=0; i < lim; i++) {
+            steps++;
+            double a2 = a*a - b*b + x;
+            double b2 = 2*a*b + y;
+            a = a2;
+            b = b2;
+            if ((a*a + b*b) > 4) {
                 break;
-            }
-            else {
-               double temp = (a+b)*(a+b) + x0;
-               //double temp = (a*a) - (b*b) + x0;
-               b = 2*a*b + y0;
-               a = temp; 
             }
          }
          
-         if (blown == 0) {
+         if (steps > 50) {
             glColor3f( 0.0, 0.0, 0.0);
          }
          glBegin(GL_POINTS);
-         glVertex2f(x0,y0);
+         //glVertex2f(x0,y0);
+         glVertex2f(px,py);
          glEnd();
       }
    }
