@@ -37,8 +37,8 @@ void displayfunc()
          double b = 0.0;
          //double x = (x/N)*(2+2)-2;
          //double y = (y/N)*(2+2)-2;
-         double x = (x/N)*(2+2);
-         double y = (y/N)*(2+2);
+         double x = (px/N)*(2+2) - 2;
+         double y = (py/N)*(2+2) - 2;
          int i;
          int lim = 100;
          int steps = 0; 
@@ -53,7 +53,7 @@ void displayfunc()
             }
          }
          
-         if (steps > 50) {
+         if (steps > 100) {
             glColor3f( 0.0, 0.0, 0.0);
          }
          glBegin(GL_POINTS);
@@ -62,6 +62,8 @@ void displayfunc()
          glEnd();
       }
    }
+
+
    glutSwapBuffers(); // single buffering... call glFlush();
    
 }
