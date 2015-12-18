@@ -1,3 +1,12 @@
+// 
+// to compile type... make 
+// uses file named... Makefile
+// 
+// a.out: fireGL.c
+// 	gcc -lGL -lGLU -lglut fireGL.c
+// 
+// tab character '\t' before gcc
+// 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
