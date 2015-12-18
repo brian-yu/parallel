@@ -6,6 +6,11 @@
 #include <GL/glut.h>
 //
 #define N     750
+int MaxIterations = 25;
+double minReal = -2.0;
+double maxReal = 2.0;
+double minImag = -2.0;
+double maxImag = 2.0;
 //
 //
 //
@@ -49,42 +54,38 @@ void displayfunc()
     //
     glClear(GL_COLOR_BUFFER_BIT); // white
 
-    double MinRe = -2.0;
-    double MaxRe = 2.0;
-    double MinIm = -2.0;
-    double MaxIm = MinRe+(MaxRe-MinRe)*N/N;
-    double Re_factor = (MaxRe-MinRe)/(N);
-    double Im_factor = (MaxIm-MinIm)/(N);
-    int MaxIterations = 1000;
+    double realScale = (maxReal-minReal)/(N);
+    double imagScale = (maxImag-minImag)/(N);
+    
 
     for(int y=0; y<N; y++)
     {
-        double c_im = MaxIm - y*Im_factor;
+        double cImag = maxImag - y*imagScale;
         for(int x=0; x<N; x++)
         {
-            double c_re = MinRe + x*Re_factor;
+            double cReal = minReal + x*realScale;
             int steps = 0;
-            double Z_re = c_re, Z_im = c_im;
+            double zReal = cReal, zImag = cImag;
             int blown = 0;
             for(int n=0; n<MaxIterations; n++)
             {
                 steps++;
-                double Z_re2 = Z_re*Z_re, Z_im2 = Z_im*Z_im;
-                if(Z_re2 + Z_im2 > 4)
+                double zReal2 = zReal*zReal, zImag2 = zImag*zImag;
+                if(zReal2 + zImag2 > 4)
                 {
                     blown = 1;
                     break;
                 }
-                Z_im = 2*Z_re*Z_im + c_im;
-                Z_re = Z_re2 - Z_im2 + c_re;
+                zImag = 2*zReal*zImag + cImag;
+                zReal = zReal2 - zImag2 + cReal;
             }
             if(blown == 0) {
-                glColor3f( 0.0, 0.0, 0.0);
+                glColor3f( 0.3039, 0.69608, 0.95882);
                 glBegin(GL_POINTS);
                 glVertex2f(x,y);
                 glEnd();
             } else {
-                glColor3f( 0.5, steps/MaxIterations * 1.0, 1.0);
+                glColor3f( 0.25, (double)steps/MaxIterations * 1.0, 0.75);
                 glBegin(GL_POINTS);
                 glVertex2f(x,y);
                 glEnd();
@@ -106,13 +107,29 @@ void reshapefunc(int wscr,int hscr)
 }
 void mousefunc(int button,int state,int xscr,int yscr)
 {
-
+    if(button==GLUT_LEFT_BUTTON) {
+        if(state==GLUT_DOWN) {
+            printf("");
+        }
+    }
 }
 void keyfunc(unsigned char key,int xscr,int yscr)
 {
+    if(key == 'w') {
+        MaxIterations++;
+        printf("Increasing maximum iterations to %d.\n",MaxIterations);
+        displayfunc();
+    }
+    if(key == 'q' && MaxIterations > 0) {
+        MaxIterations--;
+        printf("Decreasing maximum iterations to %d.\n",MaxIterations);
+        displayfunc();
+    }
+
 }
 int main(int argc,char* argv[])
 {
+    printf("Press W to sharpen, Q to unsharpen. Left click to zoom.");
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(N,N);
