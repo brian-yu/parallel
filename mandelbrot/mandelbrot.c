@@ -36,7 +36,7 @@ void displayfunc()
 
     double realScale = (maxReal-minReal)/(N);
     double imagScale = (maxImag-minImag)/(N);
-    
+
 
     for(int y=0; y<N; y++)
     {
@@ -74,7 +74,7 @@ void displayfunc()
     }
 
 
-    glutSwapBuffers(); // sif(button==GLUT_LEFT_BUTTON) {
+    glutSwapBuffers(); //
 
 }
 void reshapefunc(int wscr,int hscr)
@@ -94,11 +94,12 @@ void mousefunc(int button,int state,int xscr,int yscr)
             double imagScale = (maxImag-minImag)/(N);
             double imag = maxImag - yscr*imagScale;
             double real = minReal + xscr*realScale;
-            minReal = real - 0.25*(maxReal-minReal); 
+            minReal = real - 0.25*(maxReal-minReal);
             maxReal = real + 0.25*(maxReal-minReal);
             minImag = imag - 0.25*(maxImag-minImag);
             maxImag = imag + 0.25*(maxImag-minImag);
             displayfunc();
+            printf("Done.\n");
         }
     }
     else if(button==GLUT_RIGHT_BUTTON) {
@@ -115,14 +116,16 @@ void mousefunc(int button,int state,int xscr,int yscr)
 void keyfunc(unsigned char key,int xscr,int yscr)
 {
     if(key == 'w') {
-        max++;
+        max+=100;
         printf("Increasing maximum iterations to %d.\n",max);
         displayfunc();
+        printf("Done.\n");
     }
     if(key == 'q' && max > 0) {
-        max--;
+        max-=100;
         printf("Decreasing maximum iterations to %d.\n",max);
         displayfunc();
+        printf("Done.\n");
     }
 
 }
