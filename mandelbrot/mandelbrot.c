@@ -92,7 +92,8 @@ void mousefunc(int button,int state,int xscr,int yscr)
             printf("Zooming In.\n");
             double realScale = (maxReal-minReal)/(N);
             double imagScale = (maxImag-minImag)/(N);
-            double imag = maxImag - yscr*imagScale;
+            //double imag = maxImag - yscr*imagScale;
+            double imag = minImag + yscr*imagScale;
             double real = minReal + xscr*realScale;
             minReal = real - 0.25*(maxReal-minReal);
             maxReal = real + 0.25*(maxReal-minReal);
@@ -109,6 +110,7 @@ void mousefunc(int button,int state,int xscr,int yscr)
             minReal = -2.0;
             maxImag = 2.0;
             minImag = -2.0;
+            max = 25;
             displayfunc();
         }
     }
