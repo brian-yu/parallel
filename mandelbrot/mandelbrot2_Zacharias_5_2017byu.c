@@ -1,35 +1,18 @@
-// 
-// Torbert, 27 October 2014
-// 
-// MPI Demo
-//    mpicc mpiDemo.c
-//    mpirun -np 4 a.out
-// 
-// Manager-Worker model for parallel processing.
-// 
-// time ... real ... user 
-// 
-// htop 
-// 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <complex.h>
 //
 #include <GL/glut.h>
-// 
-#include "mpi.h"
-// 
 //
-#define N 750
+#define N     750
 int max = 25;
 double minReal = -2.0;
 double maxReal = 2.0;
 double minImag = -2.0;
 double maxImag = 2.0;
-
-int ac;
-char** av;
+//
+//
 //
 //
 void idlefunc()
@@ -46,68 +29,6 @@ GLUT_BITMAP_HELVETICA_18
 */
 void displayfunc()
 {
-    //
-   // MPI variables
-   //
-   int        rank   ;
-   int        size   ;
-   MPI_Status status ;
-   int        tag = 0;
-   //
-   // other variables
-   //
-   double     col ;
-   int j;
-   //
-   // boilerplate
-   //
-   MPI_Init(      &ac          , &av ) ;
-   MPI_Comm_size( MPI_COMM_WORLD , &size ) ; // same
-   MPI_Comm_rank( MPI_COMM_WORLD , &rank ) ; // different
-   //
-   // manager has rank = 0
-   //
-   if( rank == 0 )
-   {
-      for(int i = 1 ; i < size ; i++ )
-      {
-         
-         MPI_Send( &col , 1 , MPI_DOUBLE , i , tag , MPI_COMM_WORLD ) ;
-         col += 1;
-      }
-      //
-      while(col < N)
-      {
-          MPI_Recv( &col , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
-         //
-         j = status.MPI_SOURCE ;
-         //
-         MPI_Send( &col, 1, MPI_DOUBLE, j, tag, MPI_COMM_WORLD);
-         col += 1;
-      }
-      col = -1;
-      for(int k = 1; k < size; k++)
-      {
-          MPI_Recv( &col , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
-         //
-         j = status.MPI_SOURCE ;
-         //
-         MPI_Send( &col, 1, MPI_DOUBLE, j, tag, MPI_COMM_WORLD);
-      }
-   }
-   //
-   // workers have rank > 0
-   //
-   else
-   {
-    while(1) {
-      MPI_Recv( &col , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD , &status ) ;
-      if (col < 0) {
-        break;
-      }
-      //
-      int x = (int)col;
-      //
     double px, py;
     //
     //
@@ -120,45 +41,37 @@ void displayfunc()
     for(int y=0; y<N; y++)
     {
         double cImag = maxImag - y*imagScale;
-        double cReal = minReal + x*realScale;
-        int steps = 0;
-        double zReal = cReal, zImag = cImag;
-        int blown = 0;
-        for(int n=0; n<max; n++)
+        for(int x=0; x<N; x++)
         {
-            steps++;
-            double zReal2 = zReal*zReal, zImag2 = zImag*zImag;
-            if(zReal2 + zImag2 > 4)
+            double cReal = minReal + x*realScale;
+            int steps = 0;
+            double zReal = cReal, zImag = cImag;
+            int blown = 0;
+            for(int n=0; n<max; n++)
             {
-                blown = 1;
-                break;
+                steps++;
+                double zReal2 = zReal*zReal, zImag2 = zImag*zImag;
+                if(zReal2 + zImag2 > 4)
+                {
+                    blown = 1;
+                    break;
+                }
+                zImag = 2*zReal*zImag + cImag;
+                zReal = zReal2 - zImag2 + cReal;
             }
-            zImag = 2*zReal*zImag + cImag;
-            zReal = zReal2 - zImag2 + cReal;
+            if(blown == 0) {
+                glColor3f( 0.3039, 0.69608, 0.95882);
+                glBegin(GL_POINTS);
+                glVertex2f(x,y);
+                glEnd();
+            } else {
+                glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
+                glBegin(GL_POINTS);
+                glVertex2f(x,y);
+                glEnd();
+            }
         }
-        if(blown == 0) {
-            glColor3f( 0.3039, 0.69608, 0.95882);
-            glBegin(GL_POINTS);
-            glVertex2f(x,y);
-            glEnd();
-        } else {
-            glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
-            glBegin(GL_POINTS);
-            glVertex2f(x,y);
-            glEnd();
-        }
-        
     }
-    glutSwapBuffers(); //
-
-      MPI_Send( &col , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
-  }
- }
-   //
-   // boilerplate
-   //
-   MPI_Finalize() ;
-
 
 
     glutSwapBuffers(); //
@@ -218,11 +131,8 @@ void keyfunc(unsigned char key,int xscr,int yscr)
     }
 
 }
-
-int main( int argc , char* argv[] )
+int main(int argc,char* argv[])
 {
-    ac = argc;
-    av = argv;
     printf("Press W to sharpen, Q to unsharpen.\nLeft click to zoom and right click to reset.\nMaximum iterations set to %d.\n",max);
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -244,6 +154,6 @@ int main( int argc , char* argv[] )
     //
     return 0;
 }
-// 
+//
 // end of file
-// 
+//
