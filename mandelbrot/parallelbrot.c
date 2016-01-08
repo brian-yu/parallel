@@ -56,7 +56,7 @@ void displayfunc()
    //
    // other variables
    //
-   double     col ;
+   int     col ;
    int j;
    //
    // boilerplate
@@ -67,33 +67,37 @@ void displayfunc()
    //
    // manager has rank = 0
    //
+   printf("wtf\n");
    if( rank == 0 )
    {
+	   printf("Im Mr. Manager");
       for(int i = 1 ; i < size ; i++ )
       {
          
-         MPI_Send( &col , 1 , MPI_DOUBLE , i , tag , MPI_COMM_WORLD ) ;
+         MPI_Send( &col , 1 , MPI_INT , i , tag , MPI_COMM_WORLD ) ;
          col += 1;
       }
       //
       while(col < N)
       {
-          MPI_Recv( &col , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
+          MPI_Recv( &col , 1 , MPI_INT , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
          //
          j = status.MPI_SOURCE ;
          //
-         MPI_Send( &col, 1, MPI_DOUBLE, j, tag, MPI_COMM_WORLD);
+         MPI_Send( &col, 1, MPI_INT, j, tag, MPI_COMM_WORLD);
          col += 1;
       }
       col = -1;
       for(int k = 1; k < size; k++)
       {
-          MPI_Recv( &col , 1 , MPI_DOUBLE , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
+          MPI_Recv( &col , 1 , MPI_INT , MPI_ANY_SOURCE , tag , MPI_COMM_WORLD , &status ) ;
          //
          j = status.MPI_SOURCE ;
          //
-         MPI_Send( &col, 1, MPI_DOUBLE, j, tag, MPI_COMM_WORLD);
+         MPI_Send( &col, 1, MPI_INT, j, tag, MPI_COMM_WORLD);
       }
+      
+      glutSwapBuffers(); //
    }
    //
    // workers have rank > 0
@@ -101,12 +105,13 @@ void displayfunc()
    else
    {
     while(1) {
-      MPI_Recv( &col , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD , &status ) ;
+      MPI_Recv( &col , 1 , MPI_INT , 0 , tag , MPI_COMM_WORLD , &status ) ;
+      printf("%d", col);
       if (col < 0) {
         break;
       }
       //
-      int x = (int)col;
+      int x = col;
       //
     double px, py;
     //
@@ -138,20 +143,17 @@ void displayfunc()
         }
         if(blown == 0) {
             glColor3f( 0.3039, 0.69608, 0.95882);
-            glBegin(GL_POINTS);
-            glVertex2f(x,y);
-            glEnd();
         } else {
             glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
-            glBegin(GL_POINTS);
-            glVertex2f(x,y);
-            glEnd();
         }
-        
+        glBegin(GL_POINTS);
+        glVertex2f(x,y);
+        glEnd();
     }
-    glutSwapBuffers(); //
+    
+    MPI_Send( &col , 1 , MPI_INT , 0 , tag , MPI_COMM_WORLD ) ;
+    
 
-      MPI_Send( &col , 1 , MPI_DOUBLE , 0 , tag , MPI_COMM_WORLD ) ;
   }
  }
    //
@@ -179,7 +181,6 @@ void mousefunc(int button,int state,int xscr,int yscr)
             printf("Zooming In.\n");
             double realScale = (maxReal-minReal)/(N);
             double imagScale = (maxImag-minImag)/(N);
-            //double imag = maxImag - yscr*imagScale;
             double imag = minImag + yscr*imagScale;
             double real = minReal + xscr*realScale;
             minReal = real - 0.25*(maxReal-minReal);
@@ -223,11 +224,12 @@ int main( int argc , char* argv[] )
 {
     ac = argc;
     av = argv;
+
     printf("Press W to sharpen, Q to unsharpen.\nLeft click to zoom and right click to reset.\nMaximum iterations set to %d.\n",max);
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(N,N);
-    glutInitWindowPosition(100,50);
+    glutInitWindowPosition(1000,50);
     glutCreateWindow("");
     glClearColor(1.0,1.0,1.0,0.0);
     glShadeModel(GL_SMOOTH);

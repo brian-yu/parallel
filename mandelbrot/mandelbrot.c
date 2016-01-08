@@ -61,15 +61,12 @@ void displayfunc()
             }
             if(blown == 0) {
                 glColor3f( 0.3039, 0.69608, 0.95882);
-                glBegin(GL_POINTS);
-                glVertex2f(x,y);
-                glEnd();
             } else {
                 glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
-                glBegin(GL_POINTS);
-                glVertex2f(x,y);
-                glEnd();
             }
+            glBegin(GL_POINTS);
+            glVertex2f(x,y);
+            glEnd();
         }
     }
 
