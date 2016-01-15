@@ -53,101 +53,80 @@ void displayfunc() {
     int j, x;
     int col = 0;
     int terminate = -1;
-    int result;
+    int stepArr[N];
+    int steps;
     //
     // manager has rank = 0
     //
+    //TODO - Make it so that workers send the column that they just finished!
     if (rank == 0) {
-        printf("Im Mr. Manager\n");
+		double args[6] = {col, max, minReal, maxReal, minImag, maxImag};
+		glClear(GL_COLOR_BUFFER_BIT); // white
         for (int i = 1; i < size; i++) {
-			printf("%d\n", col);
-            MPI_Send( &col, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+			//printf("%d\n", col);
+			args[0] = col;
+            MPI_Send( &args, 6, MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
             col += 1;
         }
-        printf("!!\n");
+        //printf("Begin\n");
         while (col < N) {
-            printf("b%d\n", col);
-            MPI_Recv( &result, 1, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
-			printf("a%d\n", col);
+            //printf("b%d\n", col);
+            MPI_Recv( &stepArr, N, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
+			for (int i = 0; i < N; i++) {
+				//printf("(%d, %d): %d\n", i, col, stepArr[i]);
+				steps = stepArr[i];
+				if (steps == -1) {
+					glColor3f( 0.3039, 0.69608, 0.95882);
+				} else {
+					glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
+				}
+				glBegin(GL_POINTS);
+				glVertex2f(col,i);
+				glEnd();
+			}
             j = status.MPI_SOURCE;
-
-            MPI_Send( &col, 1, MPI_INT, j, tag, MPI_COMM_WORLD);
+			args[0] = col;
+            MPI_Send( &args, 6, MPI_DOUBLE, j, tag, MPI_COMM_WORLD);
             col++;
         }
-        printf("!!!\n");
+        //printf("Finish\n");
         for (int k = 1; k < size; k++) {
-            MPI_Recv( &result, 1, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv( &stepArr, N, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             //
+            for (int i = 0; i < N; i++) {
+				//printf("(%d, %d): %d\n", i, col, stepArr[i]);
+				steps = stepArr[i];
+				if (steps == -1) {
+					glColor3f( 0.3039, 0.69608, 0.95882);
+				} else {
+					glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
+				}
+				glBegin(GL_POINTS);
+				glVertex2f(col,i);
+				glEnd();
+			}
             j = status.MPI_SOURCE;
             //
-            MPI_Send( &terminate, 1, MPI_INT, j, tag, MPI_COMM_WORLD);
         }
 
+		
         glutSwapBuffers(); //
+        //printf("done\n");
     }
-    //
-    // workers have rank > 0
-    //
-    else {
-        while (1) {
-
-            MPI_Recv( &x, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-            printf("%d\n", x);
-            if (x < 0) {
-                break;
-            }
-            //
-            //
-            double px, py;
-            //
-            //
-            glClear(GL_COLOR_BUFFER_BIT); // white
-
-            double realScale = (maxReal - minReal) / (N);
-            double imagScale = (maxImag - minImag) / (N);
-
-            for (int y = 0; y < N; y++) {
-                double cImag = maxImag - y * imagScale;
-                double cReal = minReal + x * realScale;
-                int steps = 0;
-                double zReal = cReal, zImag = cImag;
-                int blown = 0;
-                for (int n = 0; n < max; n++) {
-                    steps++;
-                    double zReal2 = zReal * zReal, zImag2 = zImag * zImag;
-                    if (zReal2 + zImag2 > 4) {
-                        blown = 1;
-                        break;
-                    }
-                    zImag = 2 * zReal * zImag + cImag;
-                    zReal = zReal2 - zImag2 + cReal;
-                }
-                if (blown == 0) {
-                    glColor3f(0.3039, 0.69608, 0.95882);
-                } else {
-                    glColor3f(0.25, (double) steps / max * 1.0, 0.75);
-                }
-                glBegin(GL_POINTS);
-                glVertex2f(x, y);
-                glEnd();
-            }
-
-            MPI_Send( &col, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-
-        }
-    }
-
-    glutSwapBuffers(); //
+    
 
 }
 void reshapefunc(int wscr, int hscr) {
+	if (rank == 0) {
     glViewport(0, 0, (GLsizei) N, (GLsizei) N);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(0.0, 1.0 * N, 0.0, 1.0 * N); // always a square
     glMatrixMode(GL_MODELVIEW);
+	}
 }
 void mousefunc(int button, int state, int xscr, int yscr) {
+	if (rank == 0) {
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
             printf("Zooming In.\n");
@@ -173,20 +152,23 @@ void mousefunc(int button, int state, int xscr, int yscr) {
             displayfunc();
         }
     }
+	}
 }
 void keyfunc(unsigned char key, int xscr, int yscr) {
+	if (rank == 0) {
     if (key == 'w') {
-        max += 100;
+        max += 75;
         printf("Increasing maximum iterations to %d.\n", max);
         displayfunc();
         printf("Done.\n");
     }
     if (key == 'q' && max > 0) {
-        max -= 100;
+        max -= 75;
         printf("Decreasing maximum iterations to %d.\n", max);
         displayfunc();
         printf("Done.\n");
     }
+	}
 
 }
 
@@ -216,6 +198,59 @@ int main(int argc, char * argv[]) {
             //
             glutMainLoop();
         }
+        else {
+        while (1) {
+			double args[6];
+            MPI_Recv( &args, 6, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
+            int x = args[0];
+            max = args[1];
+            minReal = args[2];
+            maxReal = args[3];
+            minImag = args[4];
+            maxImag = args[5];
+            //printf("%f %f %f %f\n", minReal, maxReal, minImag, maxImag);
+            if (x < 0) {
+                break;
+            }
+            //
+            //
+            int stepArr[N];
+            double px, py;
+            //
+            //
+
+            double realScale = (maxReal - minReal) / (N);
+            double imagScale = (maxImag - minImag) / (N);
+
+            for (int y = 0; y < N; y++) {
+                double cImag = maxImag - y * imagScale;
+                double cReal = minReal + x * realScale;
+                int steps = 0;
+                double zReal = cReal, zImag = cImag;
+                int blown = 0;
+                for (int n = 0; n < max; n++) {
+                    steps++;
+                    double zReal2 = zReal * zReal, zImag2 = zImag * zImag;
+                    if (zReal2 + zImag2 > 4) {
+                        blown = 1;
+                        break;
+                    }
+                    zImag = 2 * zReal * zImag + cImag;
+                    zReal = zReal2 - zImag2 + cReal;
+                }
+                if (blown == 0) {
+                    //glColor3f(0.3039, 0.69608, 0.95882);
+                    stepArr[y] = -1;
+                } else {
+                    //glColor3f(0.25, (double) steps / max * 1.0, 0.75);
+                    stepArr[y] = steps;
+                }
+            }
+
+            MPI_Send( &stepArr, N, MPI_INT, 0, tag, MPI_COMM_WORLD);
+
+        }
+    }
         //
         //
         // boilerplate

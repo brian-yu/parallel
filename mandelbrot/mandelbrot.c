@@ -37,7 +37,6 @@ void displayfunc()
     double realScale = (maxReal-minReal)/(N);
     double imagScale = (maxImag-minImag)/(N);
 
-
     for(int y=0; y<N; y++)
     {
         double cImag = maxImag - y*imagScale;
@@ -115,13 +114,13 @@ void mousefunc(int button,int state,int xscr,int yscr)
 void keyfunc(unsigned char key,int xscr,int yscr)
 {
     if(key == 'w') {
-        max+=100;
+        max+=75;
         printf("Increasing maximum iterations to %d.\n",max);
         displayfunc();
         printf("Done.\n");
     }
     if(key == 'q' && max > 0) {
-        max-=100;
+        max-=75;
         printf("Decreasing maximum iterations to %d.\n",max);
         displayfunc();
         printf("Done.\n");
@@ -134,7 +133,7 @@ int main(int argc,char* argv[])
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(N,N);
-    glutInitWindowPosition(100,50);
+    glutInitWindowPosition(1000,50);
     glutCreateWindow("");
     glClearColor(1.0,1.0,1.0,0.0);
     glShadeModel(GL_SMOOTH);
