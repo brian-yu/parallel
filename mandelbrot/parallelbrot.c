@@ -53,7 +53,7 @@ void displayfunc() {
     int j, x;
     int col = 0;
     int terminate = -1;
-    int stepArr[N];
+    int stepArr[N+1];
     int steps;
     //
     // manager has rank = 0
@@ -71,7 +71,7 @@ void displayfunc() {
         //printf("Begin\n");
         while (col < N) {
             //printf("b%d\n", col);
-            MPI_Recv( &stepArr, N, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv( &stepArr, N+1, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
 			for (int i = 0; i < N; i++) {
 				//printf("(%d, %d): %d\n", i, col, stepArr[i]);
 				steps = stepArr[i];
@@ -81,7 +81,7 @@ void displayfunc() {
 					glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
 				}
 				glBegin(GL_POINTS);
-				glVertex2f(col,i);
+				glVertex2f(stepArr[N],i);
 				glEnd();
 			}
             j = status.MPI_SOURCE;
@@ -91,7 +91,7 @@ void displayfunc() {
         }
         //printf("Finish\n");
         for (int k = 1; k < size; k++) {
-            MPI_Recv( &stepArr, N, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv( &stepArr, N+1, MPI_INT, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
             //
             for (int i = 0; i < N; i++) {
 				//printf("(%d, %d): %d\n", i, col, stepArr[i]);
@@ -102,7 +102,7 @@ void displayfunc() {
 					glColor3f( 0.25, (double)steps/max * 1.0, 0.75);
 				}
 				glBegin(GL_POINTS);
-				glVertex2f(col,i);
+				glVertex2f(stepArr[N],i);
 				glEnd();
 			}
             j = status.MPI_SOURCE;
@@ -214,7 +214,7 @@ int main(int argc, char * argv[]) {
             }
             //
             //
-            int stepArr[N];
+            int stepArr[N+1];
             double px, py;
             //
             //
@@ -246,7 +246,7 @@ int main(int argc, char * argv[]) {
                     stepArr[y] = steps;
                 }
             }
-
+			stepArr[N] = x;
             MPI_Send( &stepArr, N, MPI_INT, 0, tag, MPI_COMM_WORLD);
 
         }

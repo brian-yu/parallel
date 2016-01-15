@@ -1,0 +1,5 @@
+localhost slots=5
+ike slots=4
+gameandwatch slots=4
+jigglypuff slots=4
+
