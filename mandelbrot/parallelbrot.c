@@ -1,25 +1,25 @@
-// 
+//
 // Torbert, 27 October 2014
-// 
+//
 // MPI Demo
 //    mpicc mpiDemo.c
 //    mpirun -np 4 a.out
-// 
+//
 // Manager-Worker model for parallel processing.
-// 
-// time ... real ... user 
-// 
-// htop 
-// 
+//
+// time ... real ... user
+//
+// htop
+//
 #include <stdio.h>
-#include <stdlib.h> 
-#include <time.h> 
+#include <stdlib.h>
+#include <time.h>
 #include <complex.h>
 //
 #include <GL/glut.h>
-// 
+//
 #include "mpi.h"
-// 
+//
 //
 #define N 750
 
@@ -109,11 +109,11 @@ void displayfunc() {
             //
         }
 
-		
+
         glutSwapBuffers(); //
         //printf("done\n");
     }
-    
+
 
 }
 void reshapefunc(int wscr, int hscr) {
@@ -215,6 +215,7 @@ int main(int argc, char * argv[]) {
             //
             //
             int stepArr[N+1];
+            stepArr[N] = x;
             double px, py;
             //
             //
@@ -246,8 +247,8 @@ int main(int argc, char * argv[]) {
                     stepArr[y] = steps;
                 }
             }
-			stepArr[N] = x;
-            MPI_Send( &stepArr, N, MPI_INT, 0, tag, MPI_COMM_WORLD);
+
+            MPI_Send( &stepArr, N+1, MPI_INT, 0, tag, MPI_COMM_WORLD);
 
         }
     }
@@ -258,6 +259,6 @@ int main(int argc, char * argv[]) {
         MPI_Finalize();
         return 0;
     }
-    // 
+    //
     // end of file
     //
