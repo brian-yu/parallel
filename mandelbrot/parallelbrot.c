@@ -1,16 +1,7 @@
 //
-// Torbert, 27 October 2014
-//
-// MPI Demo
-//    mpicc mpiDemo.c
-//    mpirun -np 4 a.out
-//
-// Manager-Worker model for parallel processing.
-//
-// time ... real ... user
-//
-// htop
-//
+// Brian Yu
+// Complile with: mpicc mandelbrotMPI.c -std=c99 -lGL -lGLU -lglut -lm
+// Run with: mpirun -np 4 -hostfile hosts.txt a.out
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
