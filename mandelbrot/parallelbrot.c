@@ -134,13 +134,17 @@ void mousefunc(int button, int state, int xscr, int yscr) {
         }
     } else if (button == GLUT_RIGHT_BUTTON) {
         if (state == GLUT_DOWN) {
-            printf("Resetting.\n");
-            maxReal = 2.0;
-            minReal = -2.0;
-            maxImag = 2.0;
-            minImag = -2.0;
-            max = 25;
+            printf("Zooming Out.\n");
+            double realScale = (maxReal - minReal) / (N);
+            double imagScale = (maxImag - minImag) / (N);
+            double imag = minImag + yscr * imagScale;
+            double real = minReal + xscr * realScale;
+            minReal = real - 1.00 * (maxReal - minReal);
+            maxReal = real + 1.00 * (maxReal - minReal);
+            minImag = imag - 1.00 * (maxImag - minImag);
+            maxImag = imag + 1.00 * (maxImag - minImag);
             displayfunc();
+            printf("Done.\n");
         }
     }
 	}
@@ -159,6 +163,15 @@ void keyfunc(unsigned char key, int xscr, int yscr) {
         displayfunc();
         printf("Done.\n");
     }
+    if (key == 'r') {
+		printf("Resetting.\n");
+        maxReal = 2.0;
+        minReal = -2.0;
+        maxImag = 2.0;
+        minImag = -2.0;
+        max = 25;
+        displayfunc();
+	}
 	}
 
 }
@@ -172,7 +185,7 @@ int main(int argc, char * argv[]) {
         MPI_Comm_size(MPI_COMM_WORLD, & size); // same
         MPI_Comm_rank(MPI_COMM_WORLD, & rank); // different
         if (rank == 0) {
-            printf("Press W to sharpen, Q to unsharpen.\nLeft click to zoom and right click to reset.\nMaximum iterations set to %d.\n", max);
+            printf("Press W to sharpen, Q to unsharpen, and R to reset.\nLeft click to zoom in and right click to zoom out.\nMaximum iterations set to %d.\n", max);
             glutInit( & argc, argv);
             glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
             glutInitWindowSize(N, N);
