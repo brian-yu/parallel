@@ -137,9 +137,9 @@ int main(void)
 			triple point = {e.x + r.x*T, e.y + r.y*T, e.z + r.z*T};
             int n = H-y-1;
 			if (i == -1) {
-				rgb[n][x][0] = 0;
-				rgb[n][x][1] = 0;
-				rgb[n][x][2] = 0;
+                rgb[n][x][0] = 178;
+                rgb[n][x][1] = 255;
+                rgb[n][x][2] = 255;
 			} else {
 				rgb[n][x][0] = (int)(a[i].h.r);
 				rgb[n][x][1] = (int)(a[i].h.g);
