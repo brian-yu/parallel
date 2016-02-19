@@ -2,6 +2,8 @@
 // Torbert, 8 February 2016
 //
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 //
 #define M 640
 #define N 480
@@ -44,6 +46,7 @@ int main(void)
    //
    return 0 ;
 }
+
 //
 // end of file
 //
