@@ -3,15 +3,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define M 640 //width
-#define N 480 //height
-#define XMIN -0.166
-#define YMIN 0
-#define XMAX 1.166
-#define YMAX 1
+#define W 640
+#define H 480
+#define XMIN -0.165625
+#define YMIN 0.001042
+#define XMAX 1.165625
+#define YMAX 0.998958
 #define NUMSPHERES 4
 
-double INF = 1.0/0.0;
 
 typedef struct
 {
@@ -31,20 +30,15 @@ typedef struct
 
 typedef struct
 {
-	int key;
-	double value;
-} pair;
-
-typedef struct
-{
 	triple c;
 	double r;
 	color h;
 
 } sphere;
 
+sphere a[NUMSPHERES] = {};
+
 triple e = { 0.50 , 0.50 , -1.00 } ; // the eye
-double zcam = 0;
 triple g = { 0.00 , 1.25 , -0.50 } ; // the light
 
 double dotp( triple t , triple u )
@@ -61,10 +55,8 @@ void diff( triple* t , triple u , triple v ) // t = u - v
 
 double magnitude(triple v)
 {
-	return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+	return sqrt(dotp(v,v));
 }
-
-sphere a[4];
 
 void init()
 {
@@ -104,8 +96,8 @@ void init()
 triple unitVector(double x, double y)
 {
     triple vector;
-	triple location = {x, y, zcam};
-	diff(&vector,location,e);
+	triple location = {x, y, 0};
+	diff(&vector, location, e);
 	double m = magnitude(vector);
 	vector.x = vector.x/m;
 	vector.y = vector.y/m;
@@ -113,59 +105,54 @@ triple unitVector(double x, double y)
 	return vector;
 }
 
-pair minDist(triple e, triple r)
-{
-	int i;
-	double minT = INF;
-	int mkey = -1;
-	for (i=0;i<NUMSPHERES;i++) {
-		double ayy = 1;
-		double b = 2*(e.x*r.x+e.y*r.y+e.z*r.z-r.x*(a[i].c.x)-r.y*(a[i].c.y)-r.z*(a[i].c.z));
-		double c = (e.x-a[i].c.x)*(e.x-a[i].c.x) + (e.y-a[i].c.y)*(e.y-a[i].c.y) + (e.z-a[i].c.z)*(e.z-a[i].c.z) - ((a[i].r)*(a[i].r));
-		double T = (((-1)*b)-sqrt(b*b-4*ayy*c))/(2*ayy);
-		if (T < minT && T > 0 && b*b-4*ayy*c>0) {
-			minT = T;
-			mkey = i;
-		}
-	}
-	pair p = {mkey,minT};
-	return p;
-}
-
 int main(void)
 {
-	int rgb[N][M][3];
-	int y,x;
+	int rgb[H][W][3];
+	int y, x;
 	FILE* fout;
 	init();
-	for (y=0;y<N;y++) {
-		for (x=0;x<M;x++) {
+	for (y = 0; y < H; y++) {
+		for (x = 0; x < W; x++) {
 			double XSIZE = XMAX - XMIN;
 			double YSIZE = YMAX - YMIN;
-			double valx = XMIN + (((double)x)/M)*XSIZE;
-			double valy = YMIN + (((double)y)/N)*YSIZE;
+			double valx = XMIN + (((double)x) / W) * XSIZE;
+			double valy = YMIN + (((double)y) / H) * YSIZE;
 			triple r = unitVector(valx,valy);
-			pair tmp = minDist(e,r);
-			int mindex = tmp.key;
-			double T = tmp.value;
-			triple point = {e.x + r.x*T,e.y + r.y*T,e.z + r.z*T};
-			if (mindex == -1) {
-				rgb[N-y-1][x][0] = 0;
-				rgb[N-y-1][x][1] = 0;
-				rgb[N-y-1][x][2] = 0;
+            
+        	double min = 1.0/0;
+        	int key = -1;
+        	for (int i = 0; i < NUMSPHERES; i++) {
+        		double b = 2*(dotp(e,r)-dotp(r, a[i].c));
+                double c = pow((e.x-a[i].c.x),2) + pow((e.y-a[i].c.y),2) + pow((e.z-a[i].c.z),2) - pow((a[i].r),2);
+                double d = b*b-4*c;
+        		double T = (-b-sqrt(d)) / 2;
+        		if (T < min && T > 0 && d>0) {
+        			min = T;
+        			key = i;
+        		}
+        	}
+            
+			int i = key;
+			double T = min;
+			triple point = {e.x + r.x*T, e.y + r.y*T, e.z + r.z*T};
+            int n = H-y-1;
+			if (i == -1) {
+				rgb[n][x][0] = 0;
+				rgb[n][x][1] = 0;
+				rgb[n][x][2] = 0;
 			} else {
-				rgb[N-y-1][x][0] = (int)(a[mindex].h.r);
-				rgb[N-y-1][x][1] = (int)(a[mindex].h.g);
-				rgb[N-y-1][x][2] = (int)(a[mindex].h.b);
+				rgb[n][x][0] = (int)(a[i].h.r);
+				rgb[n][x][1] = (int)(a[i].h.g);
+				rgb[n][x][2] = (int)(a[i].h.b);
 			}
 		}
 	}
 	fout = fopen("output.ppm", "w");
 	fprintf(fout, "P3\n");
-	fprintf(fout, "%d %d\n",M,N);
+	fprintf(fout, "%d %d\n",W,H);
 	fprintf(fout, "255\n");
-	for (y = 0; y < N; y++) {
-		for (x = 0; x < M; x++) {
+	for (y = 0; y < H; y++) {
+		for (x = 0; x < W; x++) {
 			 fprintf(fout, "%d %d %d\n", rgb[y][x][0], rgb[y][x][1], rgb[y][x][2]);
 		}
 	}
