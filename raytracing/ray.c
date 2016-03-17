@@ -45,7 +45,7 @@ typedef struct
 sphere a[NUMSPHERES] = {};
 
 triple e = { 0.50 , 0.50 , -1.00 } ; // the eye
-triple g = { 0.00 , 1.25 , -0.50 } ; // the light
+triple g = { 0.00 , -1.25 , 0.50 } ; // the light
 
 double dotp( triple t , triple u )
 {
@@ -109,28 +109,39 @@ triple unitVector(double x, double y) {
     return vector;
 }
 
-tuple minDist(triple e, triple r) {
+triple minDist(triple e, triple r) {
 
     
-    double min = 1.0/0;
+    double min = 1000000;
     int key = -1;
 
     for (int i = 0; i < NUMSPHERES; i++) {
         double b = 2*(dotp(e,r)-dotp(r, a[i].c));
         double c = pow((e.x-a[i].c.x),2) + pow((e.y-a[i].c.y),2) + pow((e.z-a[i].c.z),2) - pow((a[i].r),2);
         double d = b*b-4*c;
-        double T = (-b-sqrt(d)) / 2;
-        if (T < min && T > 0 && d>0) {
-            min = T;
+        double t = (-b-sqrt(d)) / 2;
+        if (t < min && t > 0 && d>0) {
+            min = t;
             key = i;
         }
     }
     
-    tuple pair;
-    pair.key = key;
-    pair.val = min;
+    // (x,y,z) is point of intersection, (l,m,r) is center of sphere
+    // N = ( (x-l)/r , (y-m)/r , (z-n)/r )
+    triple in = { (e.x+min*r.x), (e.y+min*r.y), (e.z+min*r.z) };
+    triple norm = { (in.x-a[key].c.x)/a[key].r, (in.y-a[key].c.y)/a[key].r, (in.z-a[key].c.z)/a[key].r };
+    double shade = dotp(norm, g);
     
-    return pair;
+    // tuple pair;
+    // pair.key = key;
+    // pair.val = min;
+    
+    triple retval;
+    retval.x = key;
+    retval.y = min;
+    retval.z = shade;
+    
+    return retval;
     
 }
 
@@ -149,10 +160,14 @@ int main(void)
             
             triple r = unitVector(valx,valy);
             
-            tuple pair;
-            pair = minDist(e, r);
-            int i = pair.key;
-            double T = pair.val;
+            triple ret;
+            ret = minDist(e, r);
+            int i = ret.x;
+            double X = ret.y;
+            double shade = ret.z;
+            
+            double d = 0.9;
+            double ac = 0.1;
             
             int n = H-y-1;
             if (i == -1) {
@@ -160,28 +175,12 @@ int main(void)
                 rgb[n][x][1] = 255;
                 rgb[n][x][2] = 255;
             } else {
-                rgb[n][x][0] = (int)(a[i].h.r);
-                rgb[n][x][1] = (int)(a[i].h.g);
-                rgb[n][x][2] = (int)(a[i].h.b);
+                rgb[n][x][0] = (int)(d*shade*a[i].h.r + ac*178);
+                rgb[n][x][1] = (int)(d*shade*a[i].h.g + ac*255);
+                rgb[n][x][2] = (int)(d*shade*a[i].h.b + ac*255);
             }
             
-            pair = minDist(g, r);
-            int il = pair.key;
-            double Tl = pair.val;
-            
-            triple v;
-            diff(&v, r, e);
-            
-            triple l;
-            diff(&l, g, a[i].c);
-            
-            double cosAngle = dotp(l, v)/(magnitude(l) * magnitude(v));
-            
-            if (cosAngle >= 0) {
-                rgb[n][x][0] = (int)(cosAngle * a[i].h.r);
-                rgb[n][x][1] = (int)(cosAngle * a[i].h.r);
-                rgb[n][x][2] = (int)(cosAngle * a[i].h.r);
-            }
+
         }
     }
     fout = fopen("output.ppm", "w");
