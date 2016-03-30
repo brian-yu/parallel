@@ -38,8 +38,8 @@ typedef struct
 
 typedef struct
 {
-    int key;
-    double val;
+    int sphere;
+    triple intersect;
 } tuple;
 
 sphere a[NUMSPHERES] = {};
@@ -98,9 +98,9 @@ void init()
    a[3].h.b =      0    ;
 }
 
-triple unitVector(double x, double y) {
+triple unitVector(double x, double y, double z, triple e) {
     triple vector;
-    triple location = {x, y, 0};
+    triple location = {x, y, z};
     diff(&vector, location, e);
     double m = magnitude(vector);
     vector.x = vector.x/m;
@@ -109,7 +109,7 @@ triple unitVector(double x, double y) {
     return vector;
 }
 
-triple minDist(triple e, triple r) {
+tuple intersect(triple e, triple r) {
 
     
     double min = 1000000;
@@ -126,20 +126,21 @@ triple minDist(triple e, triple r) {
         }
     }
     
-    // (x,y,z) is point of intersection, (l,m,r) is center of sphere
-    // N = ( (x-l)/r , (y-m)/r , (z-n)/r )
+    // // (x,y,z) is point of intersection, (l,m,r) is center of sphere
+    // // N = ( (x-l)/r , (y-m)/r , (z-n)/r )
+    double m = magnitude(r);
     triple in = { (e.x+min*r.x), (e.y+min*r.y), (e.z+min*r.z) };
-    triple norm = { (in.x-a[key].c.x)/a[key].r, (in.y-a[key].c.y)/a[key].r, (in.z-a[key].c.z)/a[key].r };
-    double shade = dotp(norm, g);
+    // triple norm = { (in.x-a[key].c.x)/a[key].r, (in.y-a[key].c.y)/a[key].r, (in.z-a[key].c.z)/a[key].r };
+    // double shade = dotp(norm, g);
+    //
+    // // tuple pair;
+    // // pair.key = key;
+    // // pair.val = min;
     
-    // tuple pair;
-    // pair.key = key;
-    // pair.val = min;
-    
-    triple retval;
-    retval.x = key;
-    retval.y = min;
-    retval.z = shade;
+    tuple retval;
+    retval.sphere = key;
+    retval.intersect = in;
+    // retval.z = shade;
     
     return retval;
     
@@ -153,21 +154,20 @@ int main(void)
     init();
     for (y = 0; y < H; y++) {
         for (x = 0; x < W; x++) {
-            double XSIZE = XMAX - XMIN;
-            double YSIZE = YMAX - YMIN;
-            double valx = XMIN + (((double)x) / W) * XSIZE;
-            double valy = YMIN + (((double)y) / H) * YSIZE;
+            double xdelta = XMAX - XMIN;
+            double ydelta = YMAX - YMIN;
+            double valx = XMIN + (((double)x) / W) * xdelta;
+            double valy = YMIN + (((double)y) / H) * ydelta;
             
-            triple r = unitVector(valx,valy);
+            triple r = unitVector(valx,valy,0,e);
             
-            triple ret;
-            ret = minDist(e, r);
-            int i = ret.x;
-            double X = ret.y;
-            double shade = ret.z;
-            
-            double d = 0.9;
-            double ac = 0.1;
+            tuple ret;
+            ret = intersect(e, r);
+            int i = ret.sphere;
+            triple in = ret.intersect;
+            // double shade = ret.z;
+            // double d = 0.9;
+            // double ac = 0.1;
             
             int n = H-y-1;
             if (i == -1) {
@@ -175,12 +175,19 @@ int main(void)
                 rgb[n][x][1] = 255;
                 rgb[n][x][2] = 255;
             } else {
-                rgb[n][x][0] = (int)(d*shade*a[i].h.r + ac*178);
-                rgb[n][x][1] = (int)(d*shade*a[i].h.g + ac*255);
-                rgb[n][x][2] = (int)(d*shade*a[i].h.b + ac*255);
+                rgb[n][x][0] = (int)(a[i].h.r);
+                rgb[n][x][1] = (int)(a[i].h.g);
+                rgb[n][x][2] = (int)(a[i].h.b);
             }
-            
 
+            triple sr = unitVector(in.x,in.y,in.z,g);
+            tuple sret = intersect(g, sr);
+            int si = sret.sphere;
+            if (si >= 0) {
+                rgb[n][x][0] = (int)(a[i].h.r*0.5);
+                rgb[n][x][1] = (int)(a[i].h.g*0.5);
+                rgb[n][x][2] = (int)(a[i].h.b*0.5);
+            }
         }
     }
     fout = fopen("output.ppm", "w");
