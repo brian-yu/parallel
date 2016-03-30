@@ -183,6 +183,7 @@ int main(void)
             triple sr = unitVector(in.x,in.y,in.z,g);
             tuple sret = intersect(g, sr);
             int si = sret.sphere;
+            triple sint = sret.intersect;
             if (si >= 0) {
                 rgb[n][x][0] = (int)(a[i].h.r*0.5);
                 rgb[n][x][1] = (int)(a[i].h.g*0.5);
