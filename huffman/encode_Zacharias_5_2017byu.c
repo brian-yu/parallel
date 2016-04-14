@@ -43,10 +43,10 @@ int main(int argc, char *argv[])
 {
 
 
-    //FILE* fin = fopen( "encodeME.txt" , "r" );
+    FILE* fin = fopen( "encodeME.txt" , "r" );
     //FILE* fin = fopen( "mobydick.txt" , "r" );
     //FILE* fin = fopen( "LOSSLESS.txt" , "r" );
-	FILE* fin = fopen( "encodeIN.txt" , "r" );
+	//FILE* fin = fopen( "encodeIN.txt" , "r" );
 
     char msg[1010101];
     long int numbytes;
