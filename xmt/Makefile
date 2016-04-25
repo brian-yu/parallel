@@ -17,3 +17,8 @@ test.out: test.c
 	if [ -a test.out ]; then rm test.out; fi;
 	gcc-5 -fopenmp test.c -fopenmp -std=c99 -O3 -lm -o test.out;
 	./test.out;
+	
+nearestone.out: nearestone.c
+	if [ -a nearestone.out ]; then rm nearestone.out; fi;
+	gcc-5 -fopenmp nearestone.c -fopenmp -std=c99 -O3 -lm -o nearestone.out;
+	./nearestone.out;
