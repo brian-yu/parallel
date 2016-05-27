@@ -22,3 +22,8 @@ nearestone.out: nearestone.c
 	if [ -a nearestone.out ]; then rm nearestone.out; fi;
 	gcc-5 -fopenmp nearestone.c -fopenmp -std=c99 -O3 -lm -o nearestone.out;
 	./nearestone.out;
+
+merge.out: merge.c
+	if [ -a merge.out ]; then rm merge.out; fi;
+	gcc-5 -fopenmp merge.c -fopenmp -std=c99 -o merge.out;
+	./merge.out;
