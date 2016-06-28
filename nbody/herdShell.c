@@ -31,18 +31,18 @@ typedef struct {
 Node arr[N];
 #define O 8
 Obstacle obs[O] = {
-    {
-        .x = -1.6, .y = 0.5, .r = 2,
-    },
-    {
-        .x = 2.6, .y = 0.5, .r = 2,
-    },
-    {
-        .x = 0.3, .y = 0.5, .r = 0.17,
-    },
-    {
-        .x = 0.7, .y = 0.5, .r = 0.17,
-    },
+    // {
+    //     .x = -1.6, .y = 0.5, .r = 2,
+    // },
+    // {
+    //     .x = 2.6, .y = 0.5, .r = 2,
+    // }// ,
+//     {
+//         .x = 0.3, .y = 0.5, .r = 0.17,
+//     },
+//     {
+//         .x = 0.7, .y = 0.5, .r = 0.17,
+//     },
 };
 //
 int nbr[N];
@@ -165,20 +165,20 @@ void idlefunc(void) {
     }
 
 
-    // for (j = 0; j < N; j++) {
-    //     double oldv = sqmag(arr[j].vx, arr[j].vy);
-    //     double newv = oldv + arr[j].dv;
-    //     if (newv > 0.15)
-    //         newv = 0.15;
-    //     if (newv < 0.05)
-    //         newv = 0.05;
-    //
-    //     double oldt = atan2(arr[j].vy, arr[j].vx);
-    //     double newt = oldt + arr[j].dt;
-    //     arr[j].vx = cos(newt) * newv + DT * arr[j].ax;
-    //     arr[j].vy = sin(newt) * newv + DT * arr[j].ay;
-    // }
-    //
+    for (j = 0; j < N; j++) {
+        double oldv = sqmag(arr[j].vx, arr[j].vy);
+        double newv = oldv + arr[j].dv;
+        if (newv > 0.15)
+            newv = 0.15;
+        if (newv < 0.05)
+            newv = 0.05;
+
+        double oldt = atan2(arr[j].vy, arr[j].vx);
+        double newt = oldt + arr[j].dt;
+        arr[j].vx = cos(newt) * newv + DT * arr[j].ax;
+        arr[j].vy = sin(newt) * newv + DT * arr[j].ay;
+    }
+
     glutPostRedisplay();
 }
 //
@@ -197,7 +197,7 @@ void displayfunc(void) {
     //
     //
     //
-    glColor3f(1.0, 1.0, 0.0); // nbr ... edge
+    glColor3f(0.0, 1.0, 0.0); // nbr ... edge
     //
     glBegin(GL_LINES);
     //
@@ -209,33 +209,33 @@ void displayfunc(void) {
     }
     //
     glEnd();
-    //
-    //
-    // for (j = 0; j < O; ++j) {
-    //     glColor3f(0.7, 0.7, 0.7);
-    //     t = 0;
-    //     while (t < 2 * M_PI) {
-    //         x1 = obs[j].x;
-    //         y1 = obs[j].y;
-    //         //
-    //         x2 = obs[j].x + obs[j].r * cos(t);
-    //         y2 = obs[j].y + obs[j].r * sin(t);
-    //         //
-    //         x3 = obs[j].x + obs[j].r * cos(t + dt);
-    //         y3 = obs[j].y + obs[j].r * sin(t + dt);
-    //         //
-    //         glBegin(GL_TRIANGLES);
-    //         glVertex2f(x1, y1);
-    //         glVertex2f(x2, y2);
-    //         glVertex2f(x3, y3);
-    //         glEnd();
-    //         //
-    //         t += dt;
-    //     }
-    // }
-    //
+
+
+    for (j = 0; j < O; ++j) {
+        glColor3f(0.9, 0.9, 0.9);
+        t = 0;
+        while (t < 2 * M_PI) {
+            x1 = obs[j].x;
+            y1 = obs[j].y;
+            //
+            x2 = obs[j].x + obs[j].r * cos(t);
+            y2 = obs[j].y + obs[j].r * sin(t);
+            //
+            x3 = obs[j].x + obs[j].r * cos(t + dt);
+            y3 = obs[j].y + obs[j].r * sin(t + dt);
+            //
+            glBegin(GL_TRIANGLES);
+            glVertex2f(x1, y1);
+            glVertex2f(x2, y2);
+            glVertex2f(x3, y3);
+            glEnd();
+            //
+            t += dt;
+        }
+    }
+
     for (j = 0; j < N; j++) {
-        glColor3f(1.0, 1.0, 1.0); // circle
+        glColor3f(0.7, 0.7, 0.7); // circle
         //
         t = 0.0;
         while (t < 2.0 * M_PI) {
@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize(Z, Z);
     glutInitWindowPosition(100, 50);
     glutCreateWindow("");
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClearColor(1.0, 1.0, 1.0, 0.0);
     glShadeModel(GL_SMOOTH);
     //
     glViewport(0, 0, (GLsizei)Z, (GLsizei)Z); // reshape
